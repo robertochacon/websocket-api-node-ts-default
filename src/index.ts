@@ -45,7 +45,7 @@ wss.on('connection', (ws: WebSocket, req) => {
   ws.send(`¡Bienvenido al canal "${channel}"!`);
 
   // Escuchar mensajes del cliente
-  ws.on('message', (message: string) => {
+  ws.on('message', (message: any) => {
     console.log(`Mensaje recibido en canal "${channel}":`, message);
 
     // Difundir el mensaje a los clientes del canal
