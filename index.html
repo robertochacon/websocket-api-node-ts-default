@@ -4,9 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Servidor WebSocket</title>
+    <style>
+        :root {
+            --green-light: #d4f4dd;
+            --green-primary: #48c78e;
+            --orange-primary: #ff9248;
+            --text-dark: #333333;
+            --text-light: #ffffff;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: var(--green-light);
+            color: var(--text-dark);
+        }
+
+        .container {
+            text-align: center;
+            background: var(--text-light);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        h1 {
+            color: var(--green-primary);
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+
+        code {
+            background: var(--green-light);
+            color: var(--text-dark);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: var(--orange-primary);
+            color: var(--text-light);
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: background 0.3s;
+        }
+
+        .button:hover {
+            background: #ff7a24;
+        }
+
+        footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: var(--text-dark);
+        }
+
+        footer a {
+            color: var(--orange-primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .image-container {
+            margin-bottom: 20px;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const host = window.location.hostname;
+            const wsUrl = `ws://${host}:8080`;
+            document.getElementById('ws-url').textContent = wsUrl;
+        });
+    </script>
 </head>
 <body>
-    <h1>Bienvenido al Servidor WebSocket</h1>
-    <p>Utiliza un cliente WebSocket para conectarte al servidor en <code>ws://localhost:8080</code>.</p>
+    <div class="container">
+        <div class="image-container">
+            <img src="https://racvycode.com/assets/img/racvy.gif" alt="Servidor WebSocket">
+        </div>
+        <h1>Bienvenido al Servidor WebSocket</h1>
+        <p>Conéctate al servidor utilizando la URL:</p>
+        <code id="ws-url">ws://localhost:8080</code>
+        <a class="button" href="#">Más información</a>
+        <footer>
+            <p>Desarrollado por <a href="#">RacvyCode</a></p>
+        </footer>
+    </div>
 </body>
 </html>
