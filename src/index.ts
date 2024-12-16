@@ -1,5 +1,6 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import * as fs from 'fs';
+import * as http from 'http'; // Servidor HTTP para la página de inicio
 
 // Leer configuración desde el archivo JSON
 const config = JSON.parse(fs.readFileSync('./config.json', 'utf-8'));
@@ -7,16 +8,38 @@ const config = JSON.parse(fs.readFileSync('./config.json', 'utf-8'));
 const PORT = config.port || 8080;
 const TOKEN = config.token || 'default-token';
 
+// Crear servidor HTTP
+const server = http.createServer((req, res) => {
+  if (req.url === '/') {
+    // Servir la página de inicio
+    fs.readFile('./index.html', (err, data) => {
+      if (err) {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Error al cargar la página de inicio.');
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(data);
+    });
+  } else {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Página no encontrada');
+  }
+});
+
 // Mapa para gestionar canales
 const channels: Map<string, Set<WebSocket>> = new Map();
 
-// Crear el servidor WebSocket
-const wss = new WebSocketServer({ port: PORT });
+// Crear el servidor WebSocket utilizando el servidor HTTP
+const wss = new WebSocketServer({ server });
 
-console.log(`Servidor WebSocket iniciado en ws://localhost:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Servidor HTTP iniciado en http://localhost:${PORT}`);
+  console.log(`Servidor WebSocket iniciado en ws://localhost:${PORT}`);
+});
 
 // Valida si un token coincide con el configurado
-function isValidToken( incomingToken: string ): boolean {
+function isValidToken(incomingToken: string): boolean {
   return incomingToken === TOKEN;
 }
 
