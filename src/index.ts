@@ -5,7 +5,7 @@ import * as http from 'http'; // Servidor HTTP para la página de inicio
 // Leer configuración desde el archivo JSON
 const config = JSON.parse(fs.readFileSync('./config.json', 'utf-8'));
 
-const PORT = config.port || 8080;
+const PORT = config.port || 3000;
 const TOKEN = config.token || 'default-token';
 
 // Crear servidor HTTP
