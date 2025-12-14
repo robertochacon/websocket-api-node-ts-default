@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "ts-node-dev src/index.ts",
     "build": "tsc && npm run copy:public",
-    "copy:public": "node -e \"const fs=require('fs');const path=require('path');if(fs.existsSync('public')){fs.mkdirSync('dist/public',{recursive:true});fs.readdirSync('public').forEach(f=>{fs.copyFileSync(path.join('public',f),path.join('dist/public',f));});}\"",
+    "copy:public": "node scripts/copy-public.js",
     "start": "node dist/index.js"
   },
   "dependencies": {
