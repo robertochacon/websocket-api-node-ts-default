@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: websocket-api
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TOKEN
+        sync: false  # Configurar en el dashboard de Render
+    healthCheckPath: /

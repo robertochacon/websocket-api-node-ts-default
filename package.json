@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "ts-node-dev src/index.ts"
+    "dev": "ts-node-dev src/index.ts",
+    "build": "tsc && npm run copy:public",
+    "copy:public": "node -e \"const fs=require('fs');const path=require('path');if(fs.existsSync('public')){fs.mkdirSync('dist/public',{recursive:true});fs.readdirSync('public').forEach(f=>{fs.copyFileSync(path.join('public',f),path.join('dist/public',f));});}\"",
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "ws": "^8.5.0"
@@ -13,5 +16,8 @@
     "@types/ws": "^8.5.13",
     "ts-node-dev": "^2.0.0",
     "typescript": "^4.9.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

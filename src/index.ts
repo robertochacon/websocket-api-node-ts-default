@@ -1,19 +1,76 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import * as fs from 'fs';
+import * as http from 'http';
+import * as path from 'path';
+import { IncomingMessage, ServerResponse } from 'http';
 
-// Leer configuración desde el archivo JSON
-const config = JSON.parse(fs.readFileSync('./config.json', 'utf-8'));
+// Leer configuración desde variables de entorno o archivo JSON
+let config: { port?: number; token?: string } = {};
+try {
+  if (fs.existsSync('./config.json')) {
+    config = JSON.parse(fs.readFileSync('./config.json', 'utf-8'));
+  }
+} catch (error) {
+  console.log('No se pudo leer config.json, usando variables de entorno');
+}
 
-const PORT = config.port || 8080;
-const TOKEN = config.token || 'default-token';
+// Render asigna el puerto automáticamente, usar process.env.PORT si está disponible
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : (config.port || 8080);
+const TOKEN = process.env.TOKEN || config.token || 'default-token';
 
 // Mapa para gestionar canales
 const channels: Map<string, Set<WebSocket>> = new Map();
 
-// Crear el servidor WebSocket
-const wss = new WebSocketServer({ port: PORT });
+// Función para encontrar y leer el archivo HTML
+function serveIndexHtml(res: ServerResponse): void {
+  const possiblePaths = [
+    path.join(__dirname, '../public/index.html'), // Desarrollo
+    path.join(__dirname, './public/index.html'),  // Producción (después de build)
+    path.join(process.cwd(), 'public/index.html') // Fallback
+  ];
+  
+  let fileFound = false;
+  for (const filePath of possiblePaths) {
+    if (fs.existsSync(filePath)) {
+      fs.readFile(filePath, (err: NodeJS.ErrnoException | null, data: Buffer) => {
+        if (err) {
+          res.writeHead(500, { 'Content-Type': 'text/plain' });
+          res.end('Error al cargar la página');
+          return;
+        }
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(data);
+      });
+      fileFound = true;
+      break;
+    }
+  }
+  
+  if (!fileFound) {
+    res.writeHead(500, { 'Content-Type': 'text/plain' });
+    res.end('Página no encontrada');
+  }
+}
 
-console.log(`Servidor WebSocket iniciado en ws://localhost:${PORT}`);
+// Crear servidor HTTP
+const server = http.createServer((req: IncomingMessage, res: ServerResponse) => {
+  // Servir la página de inicio
+  if (req.url === '/' || req.url === '/index.html') {
+    serveIndexHtml(res);
+  } else {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Página no encontrada');
+  }
+});
+
+// Crear el servidor WebSocket sobre el servidor HTTP
+const wss = new WebSocketServer({ server });
+
+// Iniciar el servidor
+server.listen(PORT, () => {
+  console.log(`Servidor HTTP iniciado en http://localhost:${PORT}`);
+  console.log(`Servidor WebSocket iniciado en ws://localhost:${PORT}`);
+});
 
 // Valida si un token coincide con el configurado
 function isValidToken( incomingToken: string ): boolean {
@@ -21,7 +78,7 @@ function isValidToken( incomingToken: string ): boolean {
 }
 
 // Manejar conexiones de clientes
-wss.on('connection', (ws: WebSocket, req) => {
+wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
   // Extraer token y canal de la URL
   const url = new URL(req.url || '', `ws://${req.headers.host}`);
   const token = url.searchParams.get('token');
